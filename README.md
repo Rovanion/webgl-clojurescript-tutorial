@@ -8,6 +8,14 @@
     - [Getting started](#getting-started)
         - [The canvas](#the-canvas)
         - [Thi.ng Geom - the helper library](#thing-geom---the-helper-library)
+            - [Namespaces](#namespaces)
+            - [Let there be darkness](#let-there-be-darkness)
+    - [Hello Triangle](#hello-triangle)
+        - [The shader spec](#the-shader-spec)
+        - [The model](#the-model)
+        - [The viewport](#the-viewport)
+        - [Putting it all together](#putting-it-all-together)
+    - [Animation loop](#animation-loop)
 
 <!-- markdown-toc end -->
 WebGL ClojureScript Tutorial
@@ -23,7 +31,7 @@ Introduction
 
 Hi, and welcome!
 
-This guide assumes basic knowledge OpenGL and [GLSL]() and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/) . It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
+This guide assumes basic knowledge OpenGL and [GLSL]() and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
 
 In order to follow this guide you'll want to have [Leiningen](http://leiningen.org/) and [Git](https://git-scm.com/) along with your favourite text editor ([Emacs](https://www.gnu.org/software/emacs/) in case you haven't decided).
 
@@ -37,7 +45,7 @@ File Hiarchy
 In order to get started we'll start off by telling Leiningen that we want a new figwheel project:
 
     lein new figwheel webgl-clojurescript-tutorial
-		cd webgl-clojurescript-tutorial
+    cd webgl-clojurescript-tutorial
 
 You'll now be standing in a directory tree looking something like this:
 
@@ -54,15 +62,15 @@ You'll now be standing in a directory tree looking something like this:
        └── webgl_clojurescript_tutorial
           └── core.cljs      -- Our ClojureScript code.
 
-The most important files here are `index.html`, `style.css` and `core.cljs`; they're the sum of our code for now. The HTML and CSS are going to be delivered as they are by the web server; core.cljs on the other hand is has to be compiled before it can be delivered to the web browser.
+The most important files here are `index.html`, `style.css` and `core.cljs`; they're the sum of our code for now. The HTML and CSS are going to be delivered as they are by the web server; `core.cljs` on the other hand is has to be compiled before it can be delivered to the web browser.
 
 In other words it's getting time to start our compiling conductor/web server/magic machine Figwheel! But before we do anything crazy we want to initiate a new git repository so that we'll always be able to land safely in a previous commit.
 
     git init
     git add src/* resources/public/index.html resources/public/css/style.css README.md project.clj dev/user.clj
-		git commit -v
+    git commit -v
 
-The file project.clj contains the Leiningen defenition of our project, it tells Leiningen where our source code is and how to compile it; but perhaps most importantly it contains the list of dependencies we're building on. We'll have to edit this file every time we want to build on the shoulders of giants.
+The file `project.clj` contains the Leiningen defenition of our project, it tells Leiningen where our source code is and how to compile it; but perhaps most importantly it contains the list of dependencies we're building on. We'll have to edit this file every time we want to build on the shoulders of giants.
 
 
 
@@ -74,20 +82,20 @@ An introduction to figwheel
 As a fast and hard rule: Muteable state should be declared like:
 
 ```clojure
-    (defonce app-state (atom 0))
+(defonce app-state (atom 0))
 ```
 
 and to be read with [`@`](https://clojuredocs.org/clojure.core/deref) and modified with [`!swap`](https://clojuredocs.org/clojure.core/swap!) like:
 
 ```clojure
-    (swap! app-state function-which-mutates-state argument-to-function-if-any)
+(swap! app-state function-which-mutates-state argument-to-function-if-any)
 ```
 
 But since an interactive programming session says more than a thousand words, go ahead and start up figwheel!
 
     lein figwheel
 
-Once done chopping its fruits your browser will have opened a new tab displaying your application. If you open your developer console you'll see that there's a message printed there for you. If we modify string literal given as the first argument to `println` and save the file we'll see the modified string printed to the console.
+Once done chopping its fruits your browser will have opened a new tab displaying your application. If you open your browsers [developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console) (right click on the background of your page and press Inspect) you'll see that there's a message printed there for you. If we modify string literal given as the first argument to `println` in `src/webgl_clojurescript_tutorial/core.cljs` and save the file we'll see the modified string printed to the console.
 
 This within itself isn't all that interesting, we'll need a more complex program to illustrate the true prowess of Figwheel. So go ahead and delete the `println` to give room for our WebGL program.
 
@@ -129,11 +137,11 @@ If you want you can right click on the whiteness somewhere 1cm in from the right
 In order to abstract ourselves away from calling `glVertexAttribPointer` and its cousins, but not above `GLSL` like [Three.js](https://github.com/cassiel/threejs-figwheel) would, I've chosen Karsten Schmidts library [thi.ng/geom](https://github.com/thi-ng/geom). We need to declare this dependency in our `project.clj`. Your dependencies section should approximate:
 
 ```clojure
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.89"]
-                 [org.clojure/core.async "0.2.385"
-                  :exclusions [org.clojure/tools.reader]]
-                 [thi.ng/geom "0.0.1178-SNAPSHOT"]]
+:dependencies [[org.clojure/clojure "1.8.0"]
+               [org.clojure/clojurescript "1.9.89"]
+               [org.clojure/core.async "0.2.385"
+                :exclusions [org.clojure/tools.reader]]
+               [thi.ng/geom "0.0.1178-SNAPSHOT"]]
 ```
 
 To download the new dependency and restart figwheel, press Ctrl-c in the terminal you ran `lein figwheel` and then start it again.
@@ -144,8 +152,8 @@ To download the new dependency and restart figwheel, press Ctrl-c in the termina
 At the very top of `src/webgl_clojurescript_tutorial/core.cljs` you'll see the following call:
 
 ```clojure
-    (ns webgl-clojurescript-tutorial.core
-      (:require ))
+(ns webgl-clojurescript-tutorial.core
+  (:require ))
 ```
 
 That is the declaration of your namespaece, an isolated piece of your program. Unlike JavaScript there is no global namespace. We now want to reference parts of the geom namespace:
@@ -166,7 +174,7 @@ Beneath `(enable-console-print!)` in `core.cljs`, add:
 (defonce gl-ctx (gl/gl-context "main"))
 ```
 
-This way we define, once and only once, the symbol `gl-ctx`. Why not start mutating the state machine by clearing its buffers? The below program should result in you having a block box on your screen.
+This way we define, once and only once, the symbol `gl-ctx`; this way we'll never end up redefining the whole state machine once the application is up and running. But that doesn't stop us from mutating the state machine, so why not start by clearing its buffers? The below program should result in you having a block box on your screen.
 
 ```clojure
 (ns webgl-clojurescript-tutorial.core
@@ -178,8 +186,8 @@ This way we define, once and only once, the symbol `gl-ctx`. Why not start mutat
 
 (doto gl-ctx
   (gl/clear-color-and-depth-buffer 0 0 0 1 1))
-
 ```
+
 If we take a peek at the defenition of `gl/clear-color-and-depth-buffer`, in Emacs with CIDER by pressing `M-.`, that the arguments are `red green blue alpha depth`. Play with the arguments a little and you'll probably understand.
 
 Remember to commit your code with `git commit -v` at every point you have a working version.
@@ -227,6 +235,162 @@ Since Geom is open source we can just as easily do all the things `gl/gl-context
 
 ```
 
-That gets unwieldier and harder to grasp, but it's good to know that you have a fallback.
+That gets unwieldier and harder to grasp, but it's good to know that we have a fallback.
 
 In case you went with the bloated version of the code, revert by calling `git commit reset --hard` from your bash terminal.
+
+
+
+Hello Triangle
+--------------
+
+Now comes the first big steps. We're going to define rudimentary fragment and vertex shaders along with a model to be drawn by them. In order for Geom to be able manage the upload of uniforms and models by itself, we must declare which they are in what's called a shader spec, a specification of the shader program.
+
+We'll have to complete a whole bunch of steps before we can see our model on the screen. So hold on, you're in for a ride!
+
+
+### The shader spec
+
+Below is the shader spec we'll use for our first hello triangle program. It's a bit more advanced than it actually has to be, but if you've written GLSL before you'll be accustomed to the use of both the model, view, and projection matrixes as well as a position vector.
+
+The shader spec itself is a map containing a vertex shader under the key `:vs`, a fragment shader under `:fs`, a map of uniforms and their type under `:uniforms` and finally the attribute `position` declared in the `:attribs` map.
+
+```clojure
+(def shader-spec
+  {:vs "void main() {
+          gl_Position = proj * view * model * vec4(position, 1.0);
+       }"
+   :fs "void main() {
+           gl_FragColor = vec4(0.5, 0.5, 1.0, 1.0);
+       }"
+   :uniforms {:model      [:mat4 mat/M44]
+              :view       :mat4
+              :proj       :mat4}
+   :attribs  {:position   :vec3}})
+```
+
+So insert the above definition into `core.cljs` below the definition of `gl-ctx`.
+
+
+### The model
+
+In order to construct a model Geom starts out defining the abstract shape. For example a sphere with the radius of 0.6 imaginary usits is described by.
+
+```clojure
+(ns webgl-clojurescript-tutorial.core (:require [thi.ng.geom.sphere :as sph]))
+(sph/sphere 0.6)
+```
+
+And a triangle is likewise defined by its corners:
+
+```clojure
+(ns webgl-clojurescript-tutorial.core (:require [thi.ng.geom.triangle :as tri]))
+(tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
+```
+
+The geometry is then realised into a mesh of triangles, a buffer with a specific size ready for handover to WebGL. In the below snippet the mesh consists of three vec3's, hence the argument `3` to `glmesh/glmesh`.
+
+```clojure
+(def model (geom/as-mesh (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
+                         {:mesh (glmesh/gl-mesh 3)}))
+```
+
+Insert the above definition of a triangle into `core.cljs` below the shader spec and insert the below requirements into your namespace declaration:
+
+```clojure
+[thi.ng.geom.core :as geom]
+[thi.ng.geom.gl.glmesh :as glmesh]
+
+```
+
+
+### The viewport
+
+We a lens through which we can view the world, and for now the default geom camera will do.
+
+```clojure
+(ns webgl-clojurescript-tutorial.core (:require [thi.ng.geom.gl.camera :as cam]))
+(defonce camera (cam/perspective-camera {}))
+```
+
+Now you might be asking yourself: "What exactly constitutes a camera?" Good question! Lets have a look!
+
+If you've entered the above defenition of the camera into your `core.cljs`, perhaps below the
+definition of the GL context, and the dependency into your list of requirements you can below that enter:
+
+```clojure
+(println camera)
+```
+
+If you save the file and take a look at the developer console in your web browser you'll see that it's been neatly described for you. Alternatively if you've got Emacs with CIDER set up, and got a CLJS REPL going (technobabble at its best), you can press `C-c C-e` with your cursor at the parenthesis surrounding the call to `cam/perspective-camera` to get the same printout in your editor.
+
+```clojure
+{:aspect 1.7777777777777777                     ; Aspect ratio.
+ :eye    #vec3 [0 0 2]                          ; Where we look from.
+ :fov    45                                     ; The field of view.
+ :up     #vec3 [0 1 0]                          ; Where up's at.
+ :near   0.1                                    ; Near plane of the frustum.
+ :proj   #object[thi.ng.geom.matrix.Matrix44]   ; Projection matrix.
+ :target #vec3 [0 0 0]                          ; Where we're looking.
+ :far    100                                    ; Far plane of the frustum.
+ :view   #object[thi.ng.geom.matrix.Matrix44]}  ; [View matrix](http://www.3dgep.com/understanding-the-view-matrix/).
+```
+
+As you can see it's a map containing most of what you'd want out of a camera. As we'll soon see this map will be joined together with the map describing the shader before being passed to the render function of Geom. So hang in there just a little bit more, we're soon there!
+
+
+### Putting it all together
+
+We'll now introduce the [`->`](https://clojuredocs.org/clojure.core/-%3E) or thread-first macro which takes the first argument, in this case `model`, and places it as the first argument of its second argument and so on. Perhaps best explained through an example:
+
+```clojure
+(-> 5 (+ 3) (/ 2) (- 1))
+; Returns 3
+;; This can be explained by using macroexpand-all from clojure.walk:
+(macroexpand-all '(-> 5 (+ 3) (/ 2) (- 1)))
+; Returns (- (/ (+ 5 3) 2) 1)')
+```
+
+This macro is used to simplify code which would otherwise look pretty shaggy. For example:
+
+```clojure
+(defn combine-model-shader-and-camera
+  [model spec camera]
+  (cam/apply
+   (gl/make-buffers-in-spec
+    (assoc (gl/as-gl-buffer-spec model {}) :shader
+           (shaders/make-shader-from-spec gl-ctx spec))
+    gl-ctx glc/static-draw) camera))
+```
+can be rewritten as
+
+```clojure
+(defn combine-model-shader-and-camera
+  [model shader-spec camera]
+  (-> model
+      (gl/as-gl-buffer-spec {})
+      (assoc :shader (shaders/make-shader-from-spec gl-ctx shader-spec))
+      (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+      (cam/apply camera)))
+```
+
+which is a great deal more readable once you understand what the macro does. The above function `combine-model-shader-and-camera` takes a model, shader-spec and camera and in order: Makes the model into a buffer-spec (a map), compiles and inserts the shader specified by `shader-spec` into on the field `:shader` of the map, creates the gl buffers specified by the shader-spec, puts the camera into the map.
+
+Add `combine-model-shader-and-camera` to `core.cljs` underneath your model definition and add `[thi.ng.geom.gl.shaders :as shaders]` to your requirements list.
+
+And now for the final step. Modify you'r `(doto ctx` so that it looks like:
+
+```clojure
+(doto gl-ctx
+  (gl/clear-color-and-depth-buffer 0 0 0 1 1)
+  (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera)))
+```
+
+and once you save `core.cljs` you should now se a fantastic blue triangle against a black background, or something along those lines.
+
+
+
+Animation loop
+--------------
+
+DOTO!
