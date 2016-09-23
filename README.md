@@ -23,7 +23,7 @@ Introduction
 
 Hi, and welcome!
 
-This guide assumes basic knowledge OpenGL and GLSL, it's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
+This guide assumes basic knowledge OpenGL and [GLSL]() and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/) . It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
 
 In order to follow this guide you'll want to have [Leiningen](http://leiningen.org/) and [Git](https://git-scm.com/) along with your favourite text editor ([Emacs](https://www.gnu.org/software/emacs/) in case you haven't decided).
 
@@ -119,7 +119,7 @@ Lets clear out the `<div>` in `<body>` and in its stead add a canvas so that we 
 </html>
 ```
 
-Now this is a rare moment, so cherish it: Press `F5` in your browser to reload the page. The index document is about the only thing figwheel can't inject to your page. In case you've forgotten the URL it's in your figwheel output: http://localhost:3449.
+Now this is a rare moment, so cherish it: Press `F5` in your browser to reload the page. The index document is about the only thing figwheel can't inject to your page. In case you've forgotten the URL, it's in your figwheel output: http://localhost:3449.
 
 If you want you can right click on the whiteness somewhere 1cm in from the right corner and press inspect in your browser, just to make sure that there's actually a canvas there.
 
@@ -137,3 +137,96 @@ In order to abstract ourselves away from calling `glVertexAttribPointer` and its
 ```
 
 To download the new dependency and restart figwheel, press Ctrl-c in the terminal you ran `lein figwheel` and then start it again.
+
+
+#### Namespaces
+
+At the very top of `src/webgl_clojurescript_tutorial/core.cljs` you'll see the following call:
+
+```clojure
+    (ns webgl-clojurescript-tutorial.core
+      (:require ))
+```
+
+That is the declaration of your namespaece, an isolated piece of your program. Unlike JavaScript there is no global namespace. We now want to reference parts of the geom namespace:
+
+```clojure
+(ns webgl-clojurescript-tutorial.core
+  (:require [thi.ng.geom.gl.core :as gl]))
+```
+
+We can now access things defined in `thi.ng.geom.gl.core` through the namespace qualifier `gl`. So lets do just that to create a [GL context](https://www.opengl.org/wiki/OpenGL_Context), our entry point to the OpenGL state machine.
+
+
+#### Let there be darkness
+
+Beneath `(enable-console-print!)` in `core.cljs`, add:
+
+```clojure
+(defonce gl-ctx (gl/gl-context "main"))
+```
+
+This way we define, once and only once, the symbol `gl-ctx`. Why not start mutating the state machine by clearing its buffers? The below program should result in you having a block box on your screen.
+
+```clojure
+(ns webgl-clojurescript-tutorial.core
+  (:require [thi.ng.geom.gl.core :as gl]))
+
+(enable-console-print!)
+
+(defonce gl-ctx (gl/gl-context "main"))
+
+(doto gl-ctx
+  (gl/clear-color-and-depth-buffer 0 0 0 1 1))
+
+```
+If we take a peek at the defenition of `gl/clear-color-and-depth-buffer`, in Emacs with CIDER by pressing `M-.`, that the arguments are `red green blue alpha depth`. Play with the arguments a little and you'll probably understand.
+
+Remember to commit your code with `git commit -v` at every point you have a working version.
+
+Since Geom is open source we can just as easily do all the things `gl/gl-context` and`gl/clear-color-and-depth-buffer` does ourselves:
+
+```clojure
+(ns webgl-clojurescript-tutorial.core
+  (:require [thi.ng.geom.gl.core :as gl]
+            [thi.ng.geom.gl.webgl.constants :as glc]))
+
+(enable-console-print!)
+
+(def context-default-attribs
+     {:alpha                                true
+      :antialias                            true
+      :depth                                true
+      :fail-if-major-performance-caveat     false
+      :prefer-low-power-to-high-performance false
+      :premultiplied-alpha                  true
+      :preserve-drawing-buffer              false
+      :stencil                              false})
+
+(defn gl-context
+  ([canvas] (gl-context canvas {}))
+  ([canvas attribs]
+   (let [canvas  (if (string? canvas) (.getElementById js/document canvas) canvas)
+         attribs (clj->js (merge context-default-attribs attribs))
+         ctx     (loop [ids ["webgl" "experimental-webgl" "webkit-3d" "moz-webgl"]]
+                   (when ids
+                     (try
+                       (let [ctx (.getContext canvas (first ids) attribs)]
+                         (set! (.-onselectstart canvas) (constantly false))
+                         (if ctx ctx (recur (next ids))))
+                       (catch js/Error e (recur (next ids))))))]
+     (or ctx (println "WebGL not available")))))
+
+;;; The below defonce's cannot and will not be reloaded by figwheel.
+(defonce gl-ctx (gl/gl-context "main"))
+
+(doto gl-ctx
+  (.clearColor 0 0 0 1)
+  (.clearDepth 1)
+  (.clear (bit-or 0x100 0x4000)))
+
+```
+
+That gets unwieldier and harder to grasp, but it's good to know that you have a fallback.
+
+In case you went with the bloated version of the code, revert by calling `git commit reset --hard` from your bash terminal.
