@@ -269,7 +269,11 @@ The shader spec itself is a map containing a vertex shader under the key `:vs`, 
    :attribs  {:position   :vec3}})
 ```
 
-So insert the above definition into `core.cljs` below the definition of `gl-ctx`.
+So insert the above definition into `core.cljs` below the definition of `gl-ctx`. Do also include the Geom matrix library in your requirements:
+
+```clojure
+[thi.ng.geom.matrix :as mat]
+```
 
 
 ### The model
