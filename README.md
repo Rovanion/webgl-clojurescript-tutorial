@@ -16,6 +16,10 @@
         - [The viewport](#the-viewport)
         - [Putting it all together](#putting-it-all-together)
     - [Animation loop](#animation-loop)
+        - [Quick look into functional programming](#quick-look-into-functional-programming)
+        - [Constructing a animation function](#constructing-a-animation-function)
+            - [The atom](#the-atom)
+        - [Writing the function](#writing-the-function)
 
 <!-- markdown-toc end -->
 WebGL ClojureScript Tutorial
@@ -31,7 +35,7 @@ Introduction
 
 Hi, and welcome!
 
-This guide assumes basic knowledge OpenGL and [GLSL]() and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
+This guide assumes basic knowledge OpenGL and [GLSL](https://en.wikipedia.org/wiki/Glsl) and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
 
 In order to follow this guide you'll want to have [Leiningen](http://leiningen.org/) and [Git](https://git-scm.com/) along with your favourite text editor ([Emacs](https://www.gnu.org/software/emacs/) in case you haven't decided).
 
@@ -397,4 +401,67 @@ and once you save `core.cljs` you should now se a fantastic blue triangle agains
 Animation loop
 --------------
 
-DOTO!
+As you might have noticed by observing the script there's only ever one frame drawn for each save-figwheel-inject loop, in order to create a slightly more interactive program we'll have to remedy that. Specifically we'll have to modify the `(doto gl-ctx)` call so that it's run on some sort of atimer.
+
+
+### Quick look into functional programming
+
+Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and clojures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language clojure.
+
+If we inspect the signature of animate (again how you do this is specific to your editor, in emacs with company-mode you press f1 or C-h when the auto complete appears) you'll find that it has two: [f] or [f elem]. `f` is by convention a name used for when passing around functions, `fun`, `func` or `function` are also common.
+
+Taking a look at the body of the first definition we find that the single argument version of `animate` simply calls its two-argument version with `nil` as the second argument, ´nil´ which in other languages is called `null` or `None`.
+
+Inside the body of the dual argument version we find a clojure defined by the function let. A clojure is a [lexical scope](https://blog.rjmetrics.com/2012/01/11/lexical-vs-dynamic-scope-in-clojure/), an anonymous namespace local to a position in code, in which symbols can be looked up. Specifically the symbol `t0` is defined to hold the value of the time at the creation of the lexical scope, `fid`, frame id, is defined as a volatile variable starting at 0. And finally `f'`is given a local name `animate*` and defined as:
+
+If the original function `f` passed to animate returns true given the time in seconds since first frame, increse the `fid` by one and queue another frame to be drawn in the future with the `animate*` function.
+
+This type of function wrapping is quite common in modern languages, in Python for example there's a special syntax for this behaviour called [decorators](http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/).
+
+
+### Constructing a animation function
+
+Based on the information we've gathered above and your previous knowledge of Clojure, try to write a call to `anim/animate` on your own! But in order to actually see that you're rendering multple frames you need something to be different between the frames. So lets define some stat that we can safely mutate into our program, introducing the [atom](https://clojuredocs.org/clojure.core/atom).
+
+#### The atom
+
+An atom can be [atomically](https://en.wikipedia.org/wiki/Atomicity_(programming)) written to and read from, i.e. as if every operation was done syncronously even though they in reality aren't. State which you want to mutate throughout the run of your program is typically well placed in an atom.
+
+It's now time to bring out a [REPL](http://web.clojurerepl.com/) and play around a bit, and I strongly encourage you to try play on your own and not just read what I'm doing.
+
+```clojure
+user=> (def a (atom 10))
+#'user/a
+user=> @a
+10
+user=> (swap! a inc)
+11
+user=> (swap! a inc)
+12
+user=> (swap! a (fn [n] (* 2 n)))
+24
+user=> (swap! a #(/ % 2))
+12
+```
+
+In the above text REPL-interaction I define an atom `a` and then swap it's content with the result of a whole bunch of different functions with the original value as in argument.
+
+Define an atom for what you want to animate in your program. I'll go with the red clear color:
+
+```clojure
+(defonce red (atom 0))
+```
+And then add a function which mutates your state atom inside what will become your core rendering loop:
+
+```clojure
+(doto gl-ctx
+  (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
+  (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera)))
+```
+
+Right. Now we're ready to make this one spin right round!
+
+
+### Writing the function
+
+Okey, throwback. You want to call `animate` from `thi.ng.geom.gl.webgl.animator` and give it as the first argument a function which takes one argument and returns true. Go!
