@@ -20,6 +20,7 @@
         - [Constructing a animation function](#constructing-a-animation-function)
             - [The atom](#the-atom)
         - [Writing the function](#writing-the-function)
+        - [A solution](#a-solution)
 
 <!-- markdown-toc end -->
 WebGL ClojureScript Tutorial
@@ -464,4 +465,51 @@ Right. Now we're ready to make this one spin right round!
 
 ### Writing the function
 
-Okey, throwback. You want to call `animate` from `thi.ng.geom.gl.webgl.animator` and give it as the first argument a function which takes one argument and returns true. Go!
+Okey, throwback: You want to call `animate` from `thi.ng.geom.gl.webgl.animator` and give it as the first argument a function which takes one argument and returns true. Go!
+
+
+
+### A solution
+
+In order to continue reading you got to promise me that you've either solved the above task, or had a honest try at it; promise? Good let me share my solution:
+
+```clojure
+(anim/animate
+ (fn [t]
+   (doto gl-ctx
+     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
+     (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true)))
+```
+
+Now: There's one problem with this solution which you'll find with this program. If you modify the literal 0.001 to perhaps 0.1 and then back again you'll find that the animation speed doesn't really drop back. This is because the `(anim/animate f)` passes `f`, or rather it's modified `f'`, into a browser internal function queue, and for every time we modify our anonymous function defined by `(fn [t]` we add another copy to that queue without a way to remove it.
+
+So there are two ways around this: Either we implement a way for our functions to return false, or we make sure to only queue our function once. The latter is rather simple to implement while still retaining the ability to modify `f` if we give `f` a name in our scope, so we'll go with that.
+
+The first step is to make sure that we only register our animation function once, so wrap the `anim/animate` call in a `defonce`:
+
+```clojure
+(defonce running
+  (anim/animate
+   (fn [t]
+     (doto gl-ctx
+       (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
+       (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true)))
+```
+
+If you modify the anonymous function we defined in `(fn` now you'll see how the behaviour doesn't change in our application, we're not regestering our function more than once. But in order to modify the function we do register we have to refactor it out and give it a name:
+
+
+
+```clojure
+(defn draw-frame []
+  (doto gl-ctx
+    (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
+    (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))))
+
+(defonce running
+  (anim/animate (fn [t] (draw-frame) true)))
+```
+
+And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in clojure the convention is to mark unpure functions with a bang at the end.
+
+Short food for thought: Functions without return values are always either unpure or pointless.
