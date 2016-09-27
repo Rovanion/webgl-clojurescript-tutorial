@@ -465,7 +465,7 @@ Right. Now we're ready to make this one spin right round!
 
 ### Writing the function
 
-Okey, throwback: You want to call `animate` from `thi.ng.geom.gl.webgl.animator` and give it as the first argument a function which takes one argument and returns true. Go!
+Okey, throwback: You want to call `animate` from `thi.ng.geom.gl.webgl.animator`. The first argument given to `animate` should be a function. This function should take one argument `t` and return `true`.
 
 
 
@@ -477,7 +477,7 @@ In order to continue reading you got to promise me that you've either solved the
 (anim/animate
  (fn [t]
    (doto gl-ctx
-     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
+     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
      (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true)))
 ```
 
