@@ -14,7 +14,6 @@
 ;;; The below defonce's cannot and will not be reloaded by figwheel.
 (defonce gl-ctx (gl/gl-context "main"))
 (defonce camera (cam/perspective-camera {}))
-(defonce red (atom 0))
 
 (def shader-spec
   {:vs "void main() {
@@ -23,31 +22,36 @@
    :fs "void main() {
            gl_FragColor = vec4(0, 0.5, 1.0, 1.0);
        }"
-   :uniforms {:model      [:mat4 mat/M44]
-              :view       :mat4
-              :proj       :mat4}
+   :uniforms {:view  :mat4
+              :proj  :mat4
+              :model :mat4}
    :attribs  {:position   :vec3}})
 
 
-(def model (geom/as-mesh
-            (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
-            {:mesh (glmesh/gl-mesh 3)}))
+(def triangle (geom/as-mesh
+               (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
+               {:mesh (glmesh/gl-mesh 3)}))
 
 
 (defn combine-model-shader-and-camera
-  [model spec camera]
-  (cam/apply
-   (gl/make-buffers-in-spec
-    (assoc (gl/as-gl-buffer-spec model {}) :shader
-           (shaders/make-shader-from-spec gl-ctx spec))
-    gl-ctx glc/static-draw) camera))
+  [model shader-spec camera]
+  (-> model
+      (gl/as-gl-buffer-spec {})
+      (assoc :shader (shaders/make-shader-from-spec gl-ctx shader-spec))
+      (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+      (cam/apply camera)))
 
-(defn draw-frame! []
+(defn spin
+  [t]
+  (geom/rotate-y mat/M44 (/ t 10)))
+
+(defn draw-frame! [t]
   (doto gl-ctx
-    (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
-    (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))))
+    (gl/clear-color-and-depth-buffer 0 0 0 1 1)
+    (gl/draw-with-shader (assoc-in (combine-model-shader-and-camera triangle shader-spec camera)
+                                   [:uniforms :model] (spin t)))))
 
 (defonce running
-  (anim/animate (fn [t] (draw-frame!) true)))
+  (anim/animate (fn [t] (draw-frame! t) true)))
 
 (defn on-js-reload [])
