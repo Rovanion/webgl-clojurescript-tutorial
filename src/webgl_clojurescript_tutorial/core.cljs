@@ -42,11 +42,12 @@
            (shaders/make-shader-from-spec gl-ctx spec))
     gl-ctx glc/static-draw) camera))
 
+(defn draw-frame! []
+  (doto gl-ctx
+    (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
+    (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))))
 
-(anim/animate
- (fn [t]
-   (doto gl-ctx
-     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
-     (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true))
+(defonce running
+  (anim/animate (fn [t] (draw-frame!) true)))
 
 (defn on-js-reload [])
