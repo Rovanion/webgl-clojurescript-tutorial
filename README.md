@@ -5,29 +5,34 @@
     - [Introduction](#introduction)
     - [File Hiarchy](#file-hiarchy)
     - [An introduction to figwheel](#an-introduction-to-figwheel)
-    - [Getting started](#getting-started)
-        - [The canvas](#the-canvas)
-        - [Thi.ng Geom - the helper library](#thing-geom---the-helper-library)
-            - [Namespaces](#namespaces)
-            - [Let there be darkness](#let-there-be-darkness)
-    - [Hello Triangle](#hello-triangle)
-        - [The shader spec](#the-shader-spec)
-        - [The model](#the-model)
-        - [The viewport](#the-viewport)
-        - [Putting it all together](#putting-it-all-together)
-    - [Animation loop](#animation-loop)
-        - [Quick look into functional programming](#quick-look-into-functional-programming)
-        - [Constructing a animation function](#constructing-a-animation-function)
-            - [The atom](#the-atom)
+- [Getting started](#getting-started)
+    - [The canvas](#the-canvas)
+    - [Thi.ng Geom - the helper library](#thing-geom---the-helper-library)
+        - [Namespaces](#namespaces)
+        - [Let there be darkness](#let-there-be-darkness)
+- [Hello Triangle](#hello-triangle)
+    - [The shader spec](#the-shader-spec)
+    - [The model](#the-model)
+    - [The viewport](#the-viewport)
+    - [Putting it all together](#putting-it-all-together)
+- [Animation loop](#animation-loop)
+    - [Quick look into functional programming](#quick-look-into-functional-programming)
+    - [Constructing a animation function](#constructing-a-animation-function)
+        - [The atom](#the-atom)
         - [Writing the function](#writing-the-function)
         - [A solution](#a-solution)
+    - [Morphing the model](#morphing-the-model)
+        - [Code checkpoint](#code-checkpoint)
+        - [Defining and passing the transform](#defining-and-passing-the-transform)
 
 <!-- markdown-toc end -->
+
+
+
 WebGL ClojureScript Tutorial
 ============================
 
 This document will guide you through the basics of setting up a WebGL application in ClojureScript using thi.ng/geom and Figwheel.
-
 
 
 
@@ -108,12 +113,13 @@ If you want to play a bit more with Figwheel before continuing I recommend tryin
 
 
 
+
 Getting started
----------------
+===============
 
 In order to get started with WebGL there's one very important aspect missing in our `index.html` - a canvas.
 
-### The canvas
+## The canvas
 
 Lets clear out the `<div>` in `<body>` and in its stead add a canvas so that we end up with the following `index.html`:
 
@@ -137,7 +143,7 @@ Now this is a rare moment, so cherish it: Press `F5` in your browser to reload t
 If you want you can right click on the whiteness somewhere 1cm in from the right corner and press inspect in your browser, just to make sure that there's actually a canvas there.
 
 
-### Thi.ng Geom - the helper library
+## Thi.ng Geom - the helper library
 
 In order to abstract ourselves away from calling `glVertexAttribPointer` and its cousins, but not above `GLSL` like [Three.js](https://github.com/cassiel/threejs-figwheel) would, I've chosen Karsten Schmidts library [thi.ng/geom](https://github.com/thi-ng/geom). We need to declare this dependency in our `project.clj`. Your dependencies section should approximate:
 
@@ -152,7 +158,7 @@ In order to abstract ourselves away from calling `glVertexAttribPointer` and its
 To download the new dependency and restart figwheel, press Ctrl-c in the terminal you ran `lein figwheel` and then start it again.
 
 
-#### Namespaces
+### Namespaces
 
 At the very top of `src/webgl_clojurescript_tutorial/core.cljs` you'll see the following call:
 
@@ -171,7 +177,7 @@ That is the declaration of your namespaece, an isolated piece of your program. U
 We can now access things defined in `thi.ng.geom.gl.core` through the namespace qualifier `gl`. So lets do just that to create a [GL context](https://www.opengl.org/wiki/OpenGL_Context), our entry point to the OpenGL state machine.
 
 
-#### Let there be darkness
+### Let there be darkness
 
 Beneath `(enable-console-print!)` in `core.cljs`, add:
 
@@ -246,15 +252,16 @@ In case you went with the bloated version of the code, revert by calling `git co
 
 
 
+
 Hello Triangle
---------------
+==============
 
 Now comes the first big steps. We're going to define rudimentary fragment and vertex shaders along with a model to be drawn by them. In order for Geom to be able manage the upload of uniforms and models by itself, we must declare which they are in what's called a shader spec, a specification of the shader program.
 
 We'll have to complete a whole bunch of steps before we can see our model on the screen. So hold on, you're in for a ride!
 
 
-### The shader spec
+## The shader spec
 
 Below is the shader spec we'll use for our first hello triangle program. It's a bit more advanced than it actually has to be, but if you've written GLSL before you'll be accustomed to the use of both the model, view, and projection matrixes as well as a position vector.
 
@@ -263,13 +270,12 @@ The shader spec itself is a map containing a vertex shader under the key `:vs`, 
 ```clojure
 (def shader-spec
   {:vs "void main() {
-          gl_Position = proj * view * model * vec4(position, 1.0);
+          gl_Position = proj * view * vec4(position, 1.0);
        }"
    :fs "void main() {
            gl_FragColor = vec4(0.5, 0.5, 1.0, 1.0);
        }"
-   :uniforms {:model      [:mat4 mat/M44]
-              :view       :mat4
+   :uniforms {:view       :mat4
               :proj       :mat4}
    :attribs  {:position   :vec3}})
 ```
@@ -281,7 +287,7 @@ So insert the above definition into `core.cljs` below the definition of `gl-ctx`
 ```
 
 
-### The model
+## The model
 
 In order to construct a model Geom starts out defining the abstract shape. For example a sphere with the radius of 0.6 imaginary usits is described by.
 
@@ -300,8 +306,8 @@ And a triangle is likewise defined by its corners:
 The geometry is then realised into a mesh of triangles, a buffer with a specific size ready for handover to WebGL. In the below snippet the mesh consists of three vec3's, hence the argument `3` to `glmesh/glmesh`.
 
 ```clojure
-(def model (geom/as-mesh (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
-                         {:mesh (glmesh/gl-mesh 3)}))
+(def triangle (geom/as-mesh (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
+                            {:mesh (glmesh/gl-mesh 3)}))
 ```
 
 Insert the above definition of a triangle into `core.cljs` below the shader spec and insert the below requirements into your namespace declaration:
@@ -313,7 +319,7 @@ Insert the above definition of a triangle into `core.cljs` below the shader spec
 ```
 
 
-### The viewport
+## The viewport
 
 We a lens through which we can view the world, and for now the default geom camera will do.
 
@@ -348,7 +354,7 @@ If you save the file and take a look at the developer console in your web browse
 As you can see it's a map containing most of what you'd want out of a camera. As we'll soon see this map will be joined together with the map describing the shader before being passed to the render function of Geom. So hang in there just a little bit more, we're soon there!
 
 
-### Putting it all together
+## Putting it all together
 
 We'll now introduce the [`->`](https://clojuredocs.org/clojure.core/-%3E) or thread-first macro which takes the first argument, in this case `model`, and places it as the first argument of its second argument and so on. Perhaps best explained through an example:
 
@@ -392,20 +398,22 @@ And now for the final step. Modify you'r `(doto ctx` so that it looks like:
 ```clojure
 (doto gl-ctx
   (gl/clear-color-and-depth-buffer 0 0 0 1 1)
-  (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera)))
+  (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera)))
 ```
 
 and once you save `core.cljs` you should now se a fantastic blue triangle against a black background, or something along those lines.
 
 
 
+
 Animation loop
---------------
+==============
 
 As you might have noticed by observing the script there's only ever one frame drawn for each save-figwheel-inject loop, in order to create a slightly more interactive program we'll have to remedy that. Specifically we'll have to modify the `(doto gl-ctx)` call so that it's run on some sort of atimer.
 
 
-### Quick look into functional programming
+
+## Quick look into functional programming
 
 Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and clojures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language clojure.
 
@@ -420,11 +428,14 @@ If the original function `f` passed to animate returns true given the time in se
 This type of function wrapping is quite common in modern languages, in Python for example there's a special syntax for this behaviour called [decorators](http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/).
 
 
-### Constructing a animation function
+
+## Constructing a animation function
 
 Based on the information we've gathered above and your previous knowledge of Clojure, try to write a call to `anim/animate` on your own! But in order to actually see that you're rendering multple frames you need something to be different between the frames. So lets define some stat that we can safely mutate into our program, introducing the [atom](https://clojuredocs.org/clojure.core/atom).
 
-#### The atom
+
+
+### The atom
 
 An atom can be [atomically](https://en.wikipedia.org/wiki/Atomicity_(programming)) written to and read from, i.e. as if every operation was done syncronously even though they in reality aren't. State which you want to mutate throughout the run of your program is typically well placed in an atom.
 
@@ -457,7 +468,7 @@ And then add a function which mutates your state atom inside what will become yo
 ```clojure
 (doto gl-ctx
   (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
-  (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera)))
+  (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera)))
 ```
 
 Right. Now we're ready to make this one spin right round!
@@ -478,7 +489,7 @@ In order to continue reading you got to promise me that you've either solved the
  (fn [t]
    (doto gl-ctx
      (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
-     (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true)))
+     (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))) true)))
 ```
 
 Now: There's one problem with this solution which you'll find with this program. If you modify the literal 0.001 to perhaps 0.1 and then back again you'll find that the animation speed doesn't really drop back. This is because the `(anim/animate f)` passes `f`, or rather it's modified `f'`, into a browser internal function queue, and for every time we modify our anonymous function defined by `(fn [t]` we add another copy to that queue without a way to remove it.
@@ -493,7 +504,7 @@ The first step is to make sure that we only register our animation function once
    (fn [t]
      (doto gl-ctx
        (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.1) 1)) 0 0 1 1)
-       (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))) true)))
+       (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))) true)))
 ```
 
 If you modify the anonymous function we defined in `(fn` now you'll see how the behaviour doesn't change in our application, we're not regestering our function more than once. But in order to modify the function we do register we have to refactor it out and give it a name:
@@ -504,7 +515,7 @@ If you modify the anonymous function we defined in `(fn` now you'll see how the 
 (defn draw-frame []
   (doto gl-ctx
     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
-    (gl/draw-with-shader (combine-model-shader-and-camera model shader-spec camera))))
+    (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))))
 
 (defonce running
   (anim/animate (fn [t] (draw-frame) true)))
@@ -513,3 +524,146 @@ If you modify the anonymous function we defined in `(fn` now you'll see how the 
 And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in clojure the convention is to mark unpure functions with a bang at the end.
 
 Short food for thought: Functions without return values are always either unpure or pointless.
+
+
+
+## Morphing the model
+
+Now, most animation for the most part isn't about changing the clear color but about moving or morphing models; so lets do some rotation!
+
+
+### Code checkpoint
+
+Lets start by removing the clear color stuff, your whole `core.cljs` should now look like this:
+
+```clojure
+(ns webgl-clojurescript-tutorial.core
+  (:require [thi.ng.geom.gl.core :as gl]
+            [thi.ng.geom.matrix :as mat]
+            [thi.ng.geom.core :as geom]
+            [thi.ng.geom.triangle :as tri]
+            [thi.ng.geom.gl.glmesh :as glmesh]
+            [thi.ng.geom.gl.shaders :as shaders]
+            [thi.ng.geom.gl.webgl.constants :as glc]
+            [thi.ng.geom.gl.camera :as cam]
+            [thi.ng.geom.gl.webgl.animator :as anim]))
+
+(enable-console-print!)
+
+;;; The below defonce's cannot and will not be reloaded by figwheel.
+(defonce gl-ctx (gl/gl-context "main"))
+(defonce camera (cam/perspective-camera {}))
+
+(def shader-spec
+  {:vs "void main() {
+          gl_Position = proj * view * vec4(position, 1.0);
+       }"
+   :fs "void main() {
+           gl_FragColor = vec4(0, 0.5, 1.0, 1.0);
+       }"
+   :uniforms {:view       :mat4
+              :proj       :mat4}
+   :attribs  {:position   :vec3}})
+
+
+(def triangle (geom/as-mesh
+               (tri/triangle3 [[1 0 0] [0 0 0] [0 1 0]])
+               {:mesh (glmesh/gl-mesh 3)}))
+
+
+(defn combine-model-shader-and-camera
+  [model shader-spec camera]
+  (-> model
+      (gl/as-gl-buffer-spec {})
+      (assoc :shader (shaders/make-shader-from-spec gl-ctx shader-spec))
+      (gl/make-buffers-in-spec gl-ctx glc/static-draw)
+      (cam/apply camera)))
+
+(defn draw-frame! [t]
+  (doto gl-ctx
+    (gl/clear-color-and-depth-buffer 0 0 0 1 1)
+    (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))))
+
+(defonce running
+  (anim/animate (fn [t] (draw-frame! t) true)))
+```
+
+If you recall your graphics programming course it's common to keep model local transformations in a 4×4 matrix uploaded as a uniform to be applied to the model on the graphics card. That's exacly what we're going to do now.
+
+### Defining and passing the transform
+
+Lets start start off by creating a function which takes the amount of time passed since the start of the program and returns a 4×4 matrix rotation matrix.
+
+```clojure
+(defn spin
+  [t]
+  (geom/rotate-y  mat/M44 (/ t 10)))
+```
+What we'll do now is to attach the result of this function to the map which in the end is what's passed to `gl/draw-with-shader`.
+
+So lets inspect that map for a second. In `core.cljs`, temporarily add `(println (combine-model-shader-and-camera triangle shader-spec camera))` to see what it's that we're passing on.
+
+
+```clojure
+{:attribs
+ {:position {:data        #object[Float32Array 1, ... ,0],
+             :size        3,
+             :buffer      #object[WebGLBuffer [object WebGLBuffer]],
+             :target      34962,
+             :buffer-mode 35044}},
+ :num-vertices 3,
+ :mode 4,
+ :shader {:vs "code ...",
+          :fs "code ...",
+          :uniforms {:view {:type    :mat4,
+                            :default nil,
+                            :setter  #object[Function "code ..."],
+                            :loc     #object[WebGLUniformLocation]},
+                     :proj {:type    :mat4,
+                            :default nil,
+                            :setter  #object[Function "code ..."],
+                            :loc     #object[WebGLUniformLocation]}},
+          :attribs  {:position 0},
+          :program  #object[WebGLProgram [object WebGLProgram]]},
+ :uniforms {:view #object[thi.ng.geom.matrix.Matrix44],
+            :proj #object[thi.ng.geom.matrix.Matrix44]}}
+```
+
+Oh yeah, that's a map. With a lot of stuff in it. Actually it's everything that's needed to compile and run the GPU program we've described so far. And what we want to do is to add a matrix in the `:uinforms` map under the key `:model`, specify that it's a uniform in our shader spec and finally write its use in the vertex shader.
+
+So lets attach the output of `spin` to the map given by `combine-model-shader-and-camera` in `core.cljs`. Also, pass on `t` from the anonymous function we give `anim/animate` to `draw-frame!`, you'll have to reload the page to redefine the `defonce`.
+
+```clojure
+(defn draw-frame! [t]
+  (doto gl-ctx
+    (gl/clear-color-and-depth-buffer 0 0 0 1 1)
+    (gl/draw-with-shader (assoc-in (combine-model-shader-and-camera triangle shader-spec camera)
+                                   [:uniforms :model] (spin t))))
+```
+And here is one interesting function: `assoc-in`. It takes a map as its first argument, inserts its third argument into the path given by the second argument. Take a look at the map three code-boxes up, under the keyword `:uniforms` it will insert a new keyword `model` with the value of what `(spin t)` returns. Cool huh?
+
+Either way, now the data's in place. But then we got to declare the data in the shader-spec so that geom can manage the upload of the data. So modify your defenition of `shader-spec` so that the `:uniforms` map now looks like:
+
+```clojure
+:uniforms {:view  :mat4
+           :proj  :mat4
+           :model :mat4}
+```
+
+And finally add model into your vertex shader `:vs` in your `shader-spec`.
+
+```clojure
+:vs "void main() {
+   gl_Position = proj * view * model * vec4(position, 1.0);
+}"
+```
+
+And what do we got here if not a spinning triangle?
+
+
+
+
+Beyond this tutorial
+====================
+
+There are a whole bunch of [examples available in the geom README.md](https://github.com/thi-ng/geom/tree/develop#example-usage). You can also take a look at [this template](https://github.com/Rovanion/webgl-figwheel-template) which has a structure very close to this tutorial, see if you can continue writing on your tutorial code until it has textures and other useful things.
