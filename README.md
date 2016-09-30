@@ -638,7 +638,7 @@ So lets attach the output of `spin` to the map given by `combine-model-shader-an
   (doto gl-ctx
     (gl/clear-color-and-depth-buffer 0 0 0 1 1)
     (gl/draw-with-shader (assoc-in (combine-model-shader-and-camera triangle shader-spec camera)
-                                   [:uniforms :model] (spin t))))
+                                   [:uniforms :model] (spin t)))))
 ```
 And here is one interesting function: `assoc-in`. It takes a map as its first argument, inserts its third argument into the path given by the second argument. Take a look at the map three code-boxes up, under the keyword `:uniforms` it will insert a new keyword `model` with the value of what `(spin t)` returns. Cool huh?
 
