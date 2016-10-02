@@ -289,7 +289,7 @@ So insert the above definition into `core.cljs` below the definition of `gl-ctx`
 
 ## The model
 
-In order to construct a model Geom starts out defining the abstract shape. For example a sphere with the radius of 0.6 imaginary usits is described by.
+In order to construct a model Geom starts out defining the abstract shape. For example a sphere with the radius of 0.6 imaginary units is described by.
 
 ```clojure
 (ns webgl-clojurescript-tutorial.core (:require [thi.ng.geom.sphere :as sph]))
