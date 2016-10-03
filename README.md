@@ -199,7 +199,7 @@ This way we define, once and only once, the symbol `gl-ctx`; this way we'll neve
   (gl/clear-color-and-depth-buffer 0 0 0 1 1))
 ```
 
-If we take a peek at the defenition of `gl/clear-color-and-depth-buffer`, in Emacs with CIDER by pressing `M-.`, that the arguments are `red green blue alpha depth`. Play with the arguments a little and you'll probably understand.
+If we take a peek at the defenition of `gl/clear-color-and-depth-buffer` that the arguments are `red green blue alpha depth`. You can find the defenition of `gl/clear-color-and-depth-buffer` in ´resources/public/js/compiled/out/thi/ng/geom/gl/core.cljc´ or in Emacs with CIDER by pressing `M-.`. Play with the arguments a little and you'll probably understand.
 
 Remember to commit your code with `git commit -v` at every point you have a working version.
 
@@ -415,9 +415,9 @@ As you might have noticed by observing the script there's only ever one frame dr
 
 ## Quick look into functional programming
 
-Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and clojures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language clojure.
+Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and clojures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language Clojure.
 
-If we inspect the signature of animate (again how you do this is specific to your editor, in emacs with company-mode you press f1 or C-h when the auto complete appears) you'll find that it has two: [f] or [f elem]. `f` is by convention a name used for when passing around functions, `fun`, `func` or `function` are also common.
+If we inspect the signature of animate you'll find that it has two: [f] or [f elem]. `f` is by convention a name used for when passing around functions, `fun`, `func` or `function` are also common. Again, how you inspect a function is specific to your editor, if you're unsure you can always look it up by opening the file ´resources/public/js/compiled/out/thi/ng/geom/gl/webgl/animator.cljs´; in Emacs with company-mode you press f1 or C-h when the auto complete appears.
 
 Taking a look at the body of the first definition we find that the single argument version of `animate` simply calls its two-argument version with `nil` as the second argument, ´nil´ which in other languages is called `null` or `None`.
 
@@ -521,7 +521,7 @@ If you modify the anonymous function we defined in `(fn` now you'll see how the 
   (anim/animate (fn [t] (draw-frame) true)))
 ```
 
-And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in clojure the convention is to mark unpure functions with a bang at the end.
+And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in Clojure the convention is to mark unpure functions with a bang at the end.
 
 Short food for thought: Functions without return values are always either unpure or pointless.
 
