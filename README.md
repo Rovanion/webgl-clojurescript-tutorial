@@ -1,3 +1,9 @@
+WebGL ClojureScript Tutorial
+============================
+
+This document will guide you through the basics of setting up a ClojureScript program with thi.ng/geom and Figwheel to [interactively program](https://www.youtube.com/watch?v=KZjFVdU8VLI) WebGL.
+
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
 **Table of Contents**
 
@@ -24,16 +30,9 @@
     - [Morphing the model](#morphing-the-model)
         - [Code checkpoint](#code-checkpoint)
         - [Defining and passing the transform](#defining-and-passing-the-transform)
+- [Beyond this tutorial](#beyond-this-tutorial)
 
 <!-- markdown-toc end -->
-
-
-
-WebGL ClojureScript Tutorial
-============================
-
-This document will guide you through the basics of setting up a WebGL application in ClojureScript using thi.ng/geom and Figwheel.
-
 
 
 Introduction
@@ -41,7 +40,7 @@ Introduction
 
 Hi, and welcome!
 
-This guide assumes basic knowledge OpenGL and [GLSL](https://en.wikipedia.org/wiki/Glsl) and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=KZjFVdU8VLI) to make 3D applications.
+This guide assumes basic knowledge OpenGL and [GLSL](https://en.wikipedia.org/wiki/Glsl) and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=j-kj2qwJa_E) to make 3D applications.
 
 In order to follow this guide you'll want to have [Leiningen](http://leiningen.org/) and [Git](https://git-scm.com/) along with your favourite text editor ([Emacs](https://www.gnu.org/software/emacs/) in case you haven't decided).
 
