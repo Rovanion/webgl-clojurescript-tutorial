@@ -9,7 +9,7 @@ This document will guide you through the basics of setting up a ClojureScript pr
 
 - [WebGL ClojureScript Tutorial](#webgl-clojurescript-tutorial)
     - [Introduction](#introduction)
-    - [File Hiarchy](#file-hiarchy)
+    - [File Hierarchy](#file-hierarchy)
     - [An introduction to figwheel](#an-introduction-to-figwheel)
 - [Getting started](#getting-started)
     - [The canvas](#the-canvas)
@@ -40,7 +40,7 @@ Introduction
 
 Hi, and welcome!
 
-This guide assumes basic knowledge OpenGL and [GLSL](https://en.wikipedia.org/wiki/Glsl) and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=j-kj2qwJa_E) to make 3D applications.
+This guide assumes basic knowledge of OpenGL and [GLSL](https://en.wikipedia.org/wiki/Glsl) and rudimentary understanding of the [Clojure syntax](http://www.tryclj.com/). It's aimed at those who want to leveredge the zero iteration time development environment provided by [figwheel](https://www.youtube.com/watch?v=j-kj2qwJa_E) to make 3D applications.
 
 In order to follow this guide you'll want to have [Leiningen](http://leiningen.org/) and [Git](https://git-scm.com/) along with your favourite text editor ([Emacs](https://www.gnu.org/software/emacs/) in case you haven't decided).
 
@@ -48,7 +48,7 @@ With that done, we're off to the races!
 
 
 
-File Hiarchy
+File Hierarchy
 ------------
 
 In order to get started we'll start off by telling Leiningen that we want a new figwheel project:
@@ -79,16 +79,16 @@ In other words it's getting time to start our compiling conductor/web server/mag
     git add src/* resources/public/index.html resources/public/css/style.css README.md project.clj dev/user.clj
     git commit -v
 
-The file `project.clj` contains the Leiningen defenition of our project, it tells Leiningen where our source code is and how to compile it; but perhaps most importantly it contains the list of dependencies we're building on. We'll have to edit this file every time we want to build on the shoulders of giants.
+The file `project.clj` contains the Leiningen definition of our project, it tells Leiningen where our source code is and how to compile it; but perhaps most importantly it contains the list of dependencies we're building on. We'll have to edit this file every time we want to build on the shoulders of giants.
 
 
 
 An introduction to figwheel
 ---------------------------
 
-[Figwheel](https://www.youtube.com/watch?v=j-kj2qwJa_E) by Bruce Hauman allows for code to dynamically be injected into your running web application without destroying it's state, provided you follow a few simple rules about how you handle your state.
+[Figwheel](https://www.youtube.com/watch?v=j-kj2qwJa_E) by Bruce Hauman allows for code to dynamically be injected into your running web application without destroying its state, provided you follow a few simple rules about how you handle your state.
 
-As a fast and hard rule: Muteable state should be declared like:
+As a fast and hard rule: Mutable state should be declared like:
 
 ```clojure
 (defonce app-state (atom 0))
@@ -104,7 +104,7 @@ But since an interactive programming session says more than a thousand words, go
 
     lein figwheel
 
-Once done chopping its fruits your browser will have opened a new tab displaying your application. If you open your browsers [developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console) (right click on the background of your page and press Inspect) you'll see that there's a message printed there for you. If we modify string literal given as the first argument to `println` in `src/webgl_clojurescript_tutorial/core.cljs` and save the file we'll see the modified string printed to the console.
+Once done chopping its fruits your browser will have opened a new tab displaying your application. If you open your browser's [developer console](https://developer.mozilla.org/en-US/docs/Tools/Web_Console) (right click on the background of your page and press Inspect) you'll see that there's a message printed there for you. If we modify string literal given as the first argument to `println` in `src/webgl_clojurescript_tutorial/core.cljs` and save the file we'll see the modified string printed to the console.
 
 This within itself isn't all that interesting, we'll need a more complex program to illustrate the true prowess of Figwheel. So go ahead and delete the `println` to give room for our WebGL program.
 
@@ -144,7 +144,7 @@ If you want you can right click on the whiteness somewhere 1cm in from the right
 
 ## Thi.ng Geom - the helper library
 
-In order to abstract ourselves away from calling `glVertexAttribPointer` and its cousins, but not above `GLSL` like [Three.js](https://github.com/cassiel/threejs-figwheel) would, I've chosen Karsten Schmidts library [thi.ng/geom](https://github.com/thi-ng/geom). We need to declare this dependency in our `project.clj`. Your dependencies section should approximate:
+In order to abstract ourselves away from calling `glVertexAttribPointer` and its cousins, but not above `GLSL` like [Three.js](https://github.com/cassiel/threejs-figwheel) would, I've chosen Karsten Schmidt's library [thi.ng/geom](https://github.com/thi-ng/geom). We need to declare this dependency in our `project.clj`. Your dependencies section should approximate:
 
 ```clojure
 :dependencies [[org.clojure/clojure "1.8.0"]
@@ -173,7 +173,7 @@ That is the declaration of your namespaece, an isolated piece of your program. U
   (:require [thi.ng.geom.gl.core :as gl]))
 ```
 
-We can now access things defined in `thi.ng.geom.gl.core` through the namespace qualifier `gl`. So lets do just that to create a [GL context](https://www.opengl.org/wiki/OpenGL_Context), our entry point to the OpenGL state machine.
+We can now access things defined in `thi.ng.geom.gl.core` through the namespace qualifier `gl`. So let's do just that to create a [GL context](https://www.opengl.org/wiki/OpenGL_Context), our entry point to the OpenGL state machine.
 
 
 ### Let there be darkness
@@ -198,7 +198,7 @@ This way we define, once and only once, the symbol `gl-ctx`; this way we'll neve
   (gl/clear-color-and-depth-buffer 0 0 0 1 1))
 ```
 
-If we take a peek at the defenition of `gl/clear-color-and-depth-buffer` that the arguments are `red green blue alpha depth`. You can find the defenition of `gl/clear-color-and-depth-buffer` in ´resources/public/js/compiled/out/thi/ng/geom/gl/core.cljc´ or in Emacs with CIDER by pressing `M-.`. Play with the arguments a little and you'll probably understand.
+If we take a peek at the definition of `gl/clear-color-and-depth-buffer` that the arguments are `red green blue alpha depth`. You can find the definition of `gl/clear-color-and-depth-buffer` in ´resources/public/js/compiled/out/thi/ng/geom/gl/core.cljc´ or in Emacs with CIDER by pressing `M-.`. Play with the arguments a little and you'll probably understand.
 
 Remember to commit your code with `git commit -v` at every point you have a working version.
 
@@ -329,7 +329,7 @@ We a lens through which we can view the world, and for now the default geom came
 
 Now you might be asking yourself: "What exactly constitutes a camera?" Good question! Lets have a look!
 
-If you've entered the above defenition of the camera into your `core.cljs`, perhaps below the
+If you've entered the above definition of the camera into your `core.cljs`, perhaps below the
 definition of the GL context, and the dependency into your list of requirements you can below that enter:
 
 ```clojure
@@ -392,15 +392,16 @@ which is a great deal more readable once you understand what the macro does. The
 
 Add `combine-model-shader-and-camera` to `core.cljs` underneath your model definition and add `[thi.ng.geom.gl.shaders :as shaders]` to your requirements list.
 
-And now for the final step. Modify you'r `(doto ctx` so that it looks like:
+And now for the final step. Modify your `(doto ctx` so that it looks like:
 
-```clojure
+```
+
 (doto gl-ctx
   (gl/clear-color-and-depth-buffer 0 0 0 1 1)
   (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera)))
 ```
 
-and once you save `core.cljs` you should now se a fantastic blue triangle against a black background, or something along those lines.
+and once you save `core.cljs` you should now see a fantastic blue triangle against a black background, or something along those lines.
 
 
 
@@ -408,21 +409,21 @@ and once you save `core.cljs` you should now se a fantastic blue triangle agains
 Animation loop
 ==============
 
-As you might have noticed by observing the script there's only ever one frame drawn for each save-figwheel-inject loop, in order to create a slightly more interactive program we'll have to remedy that. Specifically we'll have to modify the `(doto gl-ctx)` call so that it's run on some sort of atimer.
+As you might have noticed by observing the script there's only ever one frame drawn for each save-figwheel-inject loop, in order to create a slightly more interactive program we'll have to remedy that. Specifically we'll have to modify the `(doto gl-ctx)` call so that it's run on some sort of a timer.
 
 
 
 ## Quick look into functional programming
 
-Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and clojures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language Clojure.
+Geom has built in functions to support this in the namespace `thi.ng.geom.gl.webgl.animator` so add this to your requirements and make it available under then name `anim`. If you inspect the namespace `anim` in our editor you'll find that there's really only one function of interest to us `animate`. We'll take some time here for a gentle introduction to higher order functions and closures; both concepts commonly found in modern languages, the latter of which exists entirely separately from the language Clojure.
 
 If we inspect the signature of animate you'll find that it has two: [f] or [f elem]. `f` is by convention a name used for when passing around functions, `fun`, `func` or `function` are also common. Again, how you inspect a function is specific to your editor, if you're unsure you can always look it up by opening the file ´resources/public/js/compiled/out/thi/ng/geom/gl/webgl/animator.cljs´; in Emacs with company-mode you press f1 or C-h when the auto complete appears.
 
 Taking a look at the body of the first definition we find that the single argument version of `animate` simply calls its two-argument version with `nil` as the second argument, ´nil´ which in other languages is called `null` or `None`.
 
-Inside the body of the dual argument version we find a clojure defined by the function let. A clojure is a [lexical scope](https://blog.rjmetrics.com/2012/01/11/lexical-vs-dynamic-scope-in-clojure/), an anonymous namespace local to a position in code, in which symbols can be looked up. Specifically the symbol `t0` is defined to hold the value of the time at the creation of the lexical scope, `fid`, frame id, is defined as a volatile variable starting at 0. And finally `f'`is given a local name `animate*` and defined as:
+Inside the body of the dual argument version we find a closure defined by the function let. A closure is a [lexical scope](https://blog.rjmetrics.com/2012/01/11/lexical-vs-dynamic-scope-in-clojure/), an anonymous namespace local to a position in code, in which symbols can be looked up. Specifically the symbol `t0` is defined to hold the value of the time at the creation of the lexical scope, `fid`, frame id, is defined as a volatile variable starting at 0. And finally `f'`is given a local name `animate*` and defined as:
 
-If the original function `f` passed to animate returns true given the time in seconds since first frame, increse the `fid` by one and queue another frame to be drawn in the future with the `animate*` function.
+If the original function `f` passed to animate returns true given the time in seconds since first frame, increase the `fid` by one and queue another frame to be drawn in the future with the `animate*` function.
 
 This type of function wrapping is quite common in modern languages, in Python for example there's a special syntax for this behaviour called [decorators](http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/).
 
@@ -430,13 +431,13 @@ This type of function wrapping is quite common in modern languages, in Python fo
 
 ## Constructing a animation function
 
-Based on the information we've gathered above and your previous knowledge of Clojure, try to write a call to `anim/animate` on your own! But in order to actually see that you're rendering multple frames you need something to be different between the frames. So lets define some stat that we can safely mutate into our program, introducing the [atom](https://clojuredocs.org/clojure.core/atom).
+Based on the information we've gathered above and your previous knowledge of Clojure, try to write a call to `anim/animate` on your own! But in order to actually see that you're rendering multiple frames you need something to be different between the frames. So let's define some state that we can safely mutate into our program, introducing the [atom](https://clojuredocs.org/clojure.core/atom).
 
 
 
 ### The atom
 
-An atom can be [atomically](https://en.wikipedia.org/wiki/Atomicity_(programming)) written to and read from, i.e. as if every operation was done syncronously even though they in reality aren't. State which you want to mutate throughout the run of your program is typically well placed in an atom.
+An atom can be [atomically](https://en.wikipedia.org/wiki/Atomicity_(programming)) written to and read from, i.e. as if every operation was done synchronously even though they in reality aren't. State which you want to mutate throughout the run of your program is typically well placed in an atom.
 
 It's now time to bring out a [REPL](http://web.clojurerepl.com/) and play around a bit, and I strongly encourage you to try play on your own and not just read what I'm doing.
 
@@ -455,7 +456,7 @@ user=> (swap! a #(/ % 2))
 12
 ```
 
-In the above text REPL-interaction I define an atom `a` and then swap it's content with the result of a whole bunch of different functions with the original value as in argument.
+In the above text REPL-interaction I define an atom `a` and then swap its content with the result of a whole bunch of different functions with the original value as an argument.
 
 Define an atom for what you want to animate in your program. I'll go with the red clear color:
 
@@ -506,7 +507,7 @@ The first step is to make sure that we only register our animation function once
        (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))) true)))
 ```
 
-If you modify the anonymous function we defined in `(fn` now you'll see how the behaviour doesn't change in our application, we're not regestering our function more than once. But in order to modify the function we do register we have to refactor it out and give it a name:
+If you modify the anonymous function we defined in `(fn` now you'll see how the behaviour doesn't change in our application, we're not registering our function more than once. But in order to modify the function we do register we have to refactor it out and give it a name:
 
 
 
@@ -520,20 +521,20 @@ If you modify the anonymous function we defined in `(fn` now you'll see how the 
   (anim/animate (fn [t] (draw-frame) true)))
 ```
 
-And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in Clojure the convention is to mark unpure functions with a bang at the end.
+And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in Clojure the convention is to mark impure functions with a bang at the end.
 
-Short food for thought: Functions without return values are always either unpure or pointless.
+Short food for thought: Functions without return values are always either impure or pointless.
 
 
 
 ## Morphing the model
 
-Now, most animation for the most part isn't about changing the clear color but about moving or morphing models; so lets do some rotation!
+Now, most animation for the most part isn't about changing the clear color but about moving or morphing models; so let's do some rotation!
 
 
 ### Code checkpoint
 
-Lets start by removing the clear color stuff, your whole `core.cljs` should now look like this:
+Let's start by removing the clear color stuff, your whole `core.cljs` should now look like this:
 
 ```clojure
 (ns webgl-clojurescript-tutorial.core
@@ -591,7 +592,7 @@ If you recall your graphics programming course it's common to keep model local t
 
 ### Defining and passing the transform
 
-Lets start start off by creating a function which takes the amount of time passed since the start of the program and returns a 4×4 matrix rotation matrix.
+Let's start start off by creating a function which takes the amount of time passed since the start of the program and returns a 4×4 matrix rotation matrix.
 
 ```clojure
 (defn spin
@@ -600,7 +601,7 @@ Lets start start off by creating a function which takes the amount of time passe
 ```
 What we'll do now is to attach the result of this function to the map which in the end is what's passed to `gl/draw-with-shader`.
 
-So lets inspect that map for a second. In `core.cljs`, temporarily add `(println (combine-model-shader-and-camera triangle shader-spec camera))` to see what it's that we're passing on.
+So let's inspect that map for a second. In `core.cljs`, temporarily add `(println (combine-model-shader-and-camera triangle shader-spec camera))` to see what it's that we're passing on.
 
 
 ```clojure
@@ -630,7 +631,7 @@ So lets inspect that map for a second. In `core.cljs`, temporarily add `(println
 
 Oh yeah, that's a map. With a lot of stuff in it. Actually it's everything that's needed to compile and run the GPU program we've described so far. And what we want to do is to add a matrix in the `:uinforms` map under the key `:model`, specify that it's a uniform in our shader spec and finally write its use in the vertex shader.
 
-So lets attach the output of `spin` to the map given by `combine-model-shader-and-camera` in `core.cljs`. Also, pass on `t` from the anonymous function we give `anim/animate` to `draw-frame!`, you'll have to reload the page to redefine the `defonce`.
+So let's attach the output of `spin` to the map given by `combine-model-shader-and-camera` in `core.cljs`. Also, pass on `t` from the anonymous function we give `anim/animate` to `draw-frame!`, you'll have to reload the page to redefine the `defonce`.
 
 ```clojure
 (defn draw-frame! [t]
@@ -641,7 +642,7 @@ So lets attach the output of `spin` to the map given by `combine-model-shader-an
 ```
 And here is one interesting function: `assoc-in`. It takes a map as its first argument, inserts its third argument into the path given by the second argument. Take a look at the map three code-boxes up, under the keyword `:uniforms` it will insert a new keyword `model` with the value of what `(spin t)` returns. Cool huh?
 
-Either way, now the data's in place. But then we got to declare the data in the shader-spec so that geom can manage the upload of the data. So modify your defenition of `shader-spec` so that the `:uniforms` map now looks like:
+Either way, now the data's in place. But then we've got to declare the data in the shader-spec so that geom can manage the upload of the data. So modify your definition of `shader-spec` so that the `:uniforms` map now looks like:
 
 ```clojure
 :uniforms {:view  :mat4
