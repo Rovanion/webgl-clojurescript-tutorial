@@ -456,7 +456,7 @@ user=> (swap! a #(/ % 2))
 12
 ```
 
-In the above text REPL-interaction I define an atom `a` and then swap its content with the result of a whole bunch of different functions with the original value as in argument.
+In the above text REPL-interaction I define an atom `a` and then swap its content with the result of a whole bunch of different functions with the original value as an argument.
 
 Define an atom for what you want to animate in your program. I'll go with the red clear color:
 
