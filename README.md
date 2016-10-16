@@ -512,13 +512,13 @@ If you modify the anonymous function we defined in `(fn` now you'll see how the 
 
 
 ```clojure
-(defn draw-frame []
+(defn draw-frame! []
   (doto gl-ctx
     (gl/clear-color-and-depth-buffer (swap! red #(mod (+ % 0.001) 1)) 0 0 1 1)
     (gl/draw-with-shader (combine-model-shader-and-camera triangle shader-spec camera))))
 
 (defonce running
-  (anim/animate (fn [t] (draw-frame) true)))
+  (anim/animate (fn [t] (draw-frame!) true)))
 ```
 
 And the reason we call our frame-drawing function `draw-frame!` with an exclamation mark at the end is because it's not [pure](https://en.wikipedia.org/wiki/Pure_function), it has [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)) outside of its call stack. And in Clojure the convention is to mark impure functions with a bang at the end.
