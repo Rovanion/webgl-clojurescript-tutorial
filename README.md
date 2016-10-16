@@ -320,7 +320,7 @@ Insert the above definition of a triangle into `core.cljs` below the shader spec
 
 ## The viewport
 
-We a lens through which we can view the world, and for now the default geom camera will do.
+We need a lens through which we can view the world, and for now the default geom camera will do.
 
 ```clojure
 (ns webgl-clojurescript-tutorial.core (:require [thi.ng.geom.gl.camera :as cam]))
