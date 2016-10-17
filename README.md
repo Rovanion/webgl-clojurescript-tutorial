@@ -4,6 +4,8 @@ WebGL ClojureScript Tutorial
 This document will guide you through the basics of setting up a ClojureScript program with thi.ng/geom and Figwheel to [interactively program](https://www.youtube.com/watch?v=KZjFVdU8VLI) WebGL.
 
 
+[![Live coding!](https://j.gifs.com/RgMoM0.gif)](https://www.youtube.com/watch?v=0ipebuJ8QN0)
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
 **Table of Contents**
 
