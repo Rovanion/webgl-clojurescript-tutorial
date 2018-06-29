@@ -669,3 +669,5 @@ Beyond this tutorial
 ====================
 
 There are a whole bunch of [examples available in the geom README.md](https://github.com/thi-ng/geom/tree/develop#example-usage). You can also take a look at [this template](https://github.com/Rovanion/webgl-figwheel-template) which has a structure very close to this tutorial, see if you can continue writing on your tutorial code until it has textures and other useful things.
+
+You can also try to find the bug in the program you've just created where the shaders are rebuilt for each and every frame, something which eventually causes Firefox to crash due to being out of memory as it [doesn't seem to garbage collect its shader cache](https://bugzilla.mozilla.org/show_bug.cgi?id=1319426).
