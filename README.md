@@ -150,10 +150,10 @@ In order to abstract ourselves away from calling `glVertexAttribPointer` and its
 
 ```clojure
 :dependencies [[org.clojure/clojure "1.8.0"]
-               [org.clojure/clojurescript "1.9.89"]
+               [org.clojure/clojurescript "1.10.339"]
                [org.clojure/core.async "0.2.385"
                 :exclusions [org.clojure/tools.reader]]
-               [thi.ng/geom "0.0.1178-SNAPSHOT"]]
+               [thi.ng/geom "1.0.0-RC3"]]
 ```
 
 To download the new dependency and restart figwheel, press Ctrl-c in the terminal you ran `lein figwheel` and then start it again.
